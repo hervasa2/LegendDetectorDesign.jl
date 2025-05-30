@@ -3,8 +3,10 @@
 abstract type ValidGeometry end
 abstract type InvalidGeometry end
 abstract type AbstractDesignGeometry{T <: SSDFloat, V <: Union{ValidGeometry, InvalidGeometry}} end
+abstract type AbstractBouleGeometry{N, T <: SSDFloat} end
 
 include("InvertedCoaxGeometry.jl")
+include("BouleGeometry.jl")
 
 get_physical_volume(geo::AbstractDesignGeometry{T, InvalidGeometry}) where {T} = missing
 

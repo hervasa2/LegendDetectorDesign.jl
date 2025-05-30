@@ -13,6 +13,8 @@ using Unitful
 using LegendDataManagement
 using SolidStateDetectors
 using Printf
+using Interpolations
+using StaticArrays
 
 import SolidStateDetectors: 
             SSDFloat, AbstractImpurityDensity, Simulation, AbstractCoordinatePoint, update_till_convergence!, mark_bulk_bits!, mark_undep_bits!
@@ -26,6 +28,6 @@ include("ImpurityDensities.jl")
 include("ElectricField.jl")
 include("Characterize.jl")
 
-export DetectorDesign, InvertedCoaxDesign, InvertedCoaxGeometry, LinBouleImpurityDensity, ParBouleImpurityDensity, LinExpBouleImpurityDensity, ParExpBouleImpurityDensity, ValidGeometry, InvalidGeometry, characterize!, fit_function, from_internal_units, to_internal_units
+export DetectorDesign, InvertedCoaxDesign, InvertedCoaxGeometry, BouleGeometry, LinBouleImpurityDensity, ParBouleImpurityDensity, LinExpBouleImpurityDensity, ParExpBouleImpurityDensity, ValidGeometry, InvalidGeometry, characterize!, fit_function, from_internal_units, to_internal_units
 
 end # module

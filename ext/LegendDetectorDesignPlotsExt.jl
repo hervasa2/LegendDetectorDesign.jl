@@ -8,6 +8,7 @@ using Printf
 using LinearAlgebra
 using LegendDetectorDesign
 using SolidStateDetectors
+using Interpolations
 
 abstract type AbstractMeasurement{T <: Real} end
 
@@ -346,18 +347,18 @@ end
         guide := ""
         axis := false
         label --> nothing
-        bottom_margin --> 3*Plots.mm
-        top_margin --> 3*Plots.mm
-        left_margin --> 3*Plots.mm
-        right_margin --> 3*Plots.mm
+        bottom_margin --> 2*Plots.mm
+        top_margin --> 2*Plots.mm
+        left_margin --> 2*Plots.mm
+        right_margin := 2*Plots.mm
+        size --> (500,1000)
+        xlims --> (-70, 70)
+        ylims --> (-160, 140)
     end
     @series begin
         if technical_drawing 
-            size --> (500,1200)
             include_measurements --> true
             #measurementfontsize --> 8
-            xlims := (-90, 90)
-            ylims := (-150, 155)
         end
         det.geometry
     end
@@ -411,7 +412,7 @@ end
                 Plots.text("Crystal ID: $(crystal_prefix*det.name[4:end-1])", 12, :black, :left),
                 Plots.text("Diode: $(det.name)\nOrder: $order", 8, :gray, :left)
             ]
-            [0, x + spot_offset/2, -13, -13], [geo.height+16+10, y - spot_guide_offset - 3, -148, -154]
+            [0, x + spot_offset/2, 0, 0], [geo.height+16+10, y - spot_guide_offset - 3, -149, -156]
         end
     end
 end
