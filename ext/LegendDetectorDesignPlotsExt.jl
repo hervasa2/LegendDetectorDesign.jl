@@ -417,4 +417,18 @@ end
     end
 end
 
+@recipe function f(boule::BouleGeometry{T}) where {T}
+    aspect_ratio := 1.0
+    seriestype := :shape
+    fillcolor --> :lightgray
+    label --> nothing
+    linestyle --> :solid
+    linecolor --> :black
+
+    z = range(boule.distance_from_seed_end[1], boule.distance_from_seed_end[end], 100)
+    r = boule.spline(z)
+
+    vcat(z,reverse(z)), vcat(r,-reverse(r))
+end
+
 end # module

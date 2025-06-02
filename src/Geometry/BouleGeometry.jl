@@ -18,6 +18,16 @@ function BouleGeometry{T}(distance_from_seed_end::Vector{<:Number}, radius::Vect
     BouleGeometry{N, T}(d, r, spline)
 end
 
+get_boule_radius(geo::BouleGeometry, z::Number) = geo.spline(to_internal_length_units(z))
+
+function get_physical_volume(geo::BouleGeometry{N,T})::T where {N,T}
+    n_slices = 1000000
+    z = range(geo.distance_from_seed_end[1], geo.distance_from_seed_end[end], n_slices)
+    step = z[2] - z[1]
+    r = geo.spline(z)
+    ustrip(u"cm^3", sum(r.^2 * π * step)*internal_length_unit^3)
+end
+
 function resample_with_min_step(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     @assert length(x) == length(y) "x and y must have the same length"
     @assert issorted(x) "x must be sorted in increasing order"
