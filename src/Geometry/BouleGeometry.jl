@@ -1,16 +1,20 @@
 # This file is a part of LegendDetectorDesign.jl, licensed under the MIT License (MIT).
 
 struct BouleGeometry{N, T} <: AbstractBouleGeometry{N, T}
-    distance_from_seed_end::SVector{N, T}
+    z::SVector{N, T}
     radius::SVector{N, T}
     spline::Interpolations.Extrapolation{T}
 end
 
-function BouleGeometry{T}(distance_from_seed_end::Vector{<:Number}, radius::Vector{<:Number}) where {T}
-    @assert length(distance_from_seed_end) == length(radius) "Vectors must be the same length"
-    N = length(distance_from_seed_end)
+function BouleGeometry(::Type{T};
+        z::Vector{<:Number}, 
+        radius::Vector{<:Number}
+    ) where {T}
 
-    d = SVector{N, T}(to_internal_length_units.(distance_from_seed_end))
+    @assert length(z) == length(radius) "Vectors must be the same length"
+    N = length(z)
+
+    d = SVector{N, T}(to_internal_length_units.(z))
     r = SVector{N, T}(to_internal_length_units.(radius))
 
     new_d, new_r = resample_with_min_step(d, r)
@@ -22,7 +26,7 @@ get_boule_radius(geo::BouleGeometry, z::Number) = geo.spline(to_internal_length_
 
 function get_physical_volume(geo::BouleGeometry{N,T})::T where {N,T}
     n_slices = 1000000
-    z = range(geo.distance_from_seed_end[1], geo.distance_from_seed_end[end], n_slices)
+    z = range(geo.z[1], geo.z[end], n_slices)
     step = z[2] - z[1]
     r = geo.spline(z)
     ustrip(u"cm^3", sum(r.^2 * π * step)*internal_length_unit^3)

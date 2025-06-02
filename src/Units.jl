@@ -19,6 +19,7 @@ to_internal_units(x::Quantity{<:Real, dimension(internal_angle_unit)})  = ustrip
 to_internal_units(x::Quantity{<:Real, dimension(internal_mass_unit)})  = ustrip(internal_mass_unit,  x)
 to_internal_units(x::Quantity{<:Real, dimension(internal_density_unit)})  = ustrip(internal_density_unit,  x)
 to_internal_units(x::Quantity{<:Real, dimension(internal_impurity_quantity)})  = ustrip(x/internal_impurity_quantity)
+to_internal_units(::Missing) = missing
 
 to_internal_length_units(x::Real) = x
 to_internal_length_units(x::Quantity{<:Real, dimension(internal_length_unit)}) = to_internal_units(x)

@@ -17,17 +17,18 @@ using Interpolations
 using StaticArrays
 
 import SolidStateDetectors: 
-            SSDFloat, AbstractImpurityDensity, Simulation, AbstractCoordinatePoint, update_till_convergence!, mark_bulk_bits!, mark_undep_bits!
+        SSDFloat, AbstractImpurityDensity, Simulation, AbstractCoordinatePoint, update_till_convergence!, mark_bulk_bits!, mark_undep_bits!
 
 import Base: show, print, println
 
 include("Units.jl")
 include("Geometry/Geometry.jl")
 include("DetectorDesign.jl")
+include("CrystallineBoule.jl")
 include("ImpurityDensities.jl")
 include("ElectricField.jl")
 include("Characterize.jl")
 
-export DetectorDesign, InvertedCoaxDesign, InvertedCoaxGeometry, BouleGeometry, LinBouleImpurityDensity, ParBouleImpurityDensity, LinExpBouleImpurityDensity, ParExpBouleImpurityDensity, ValidGeometry, InvalidGeometry, characterize!, fit_function, from_internal_units, to_internal_units
+export DetectorDesign, InvertedCoaxDesign, InvertedCoaxGeometry, BouleGeometry, CrystallineBoule, LinBouleImpurityDensity, ParBouleImpurityDensity, LinExpBouleImpurityDensity, ParExpBouleImpurityDensity, ValidGeometry, InvalidGeometry, characterize!, fit_function, from_internal_units, to_internal_units, get_unitful_property
 
 end # module
