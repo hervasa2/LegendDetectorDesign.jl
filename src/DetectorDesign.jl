@@ -86,11 +86,11 @@ function print(io::IO, det::DetectorDesign{T, <:AbstractDesignGeometry{T,Invalid
    println(io, "INVALID GEOMETRY!") 
 end
 
-function show(io::IO, det::DetectorDesign{T}) where {T <: SSDFloat}
+function show(io::IO, det::DetectorDesign)
     print(io, det)
 end
 
-function show(io::IO, ::MIME"text/plain", det::DetectorDesign{T}) where {T <: SSDFloat}
+function show(io::IO, ::MIME"text/plain", det::DetectorDesign)
     show(io, det)
 end
 

@@ -36,3 +36,22 @@ get_impurity_density(boule::CrystallineBoule, z::Number) = boule.impurity_model(
 
 #need to be consistent with get_ functions (do they always return unitfill values?)
 get_impurity_density(boule, z::AbstractArray) = broadcast(z -> get_impurity_density(boule, z), z)
+
+function print(io::IO, boule::CrystallineBoule)
+    geo = boule.geometry
+    g1,g2,g3,g4,g5 = get_unicode_rep(geo, cut = !ismissing(boule.z_hall))
+    r, l = Int.(round.((maximum(geo.radius), geo.z[end]-geo.z[1])))
+    println(io, "$g1  $(typeof(boule)) - $(boule.name)")
+    println(io, "$g2  ╰─Impurity model: $(boule.impurity_model)")
+    println(io, "$g3    ╰─Params: $(boule.impurity_model_parameters)")
+    println(io, "$g4  ╰─Length: $(geo.z[end]-geo.z[1]) mm")
+    println(io, "$g5  ╰─Mass: $(Int(round(get_physical_volume(geo)*ge_76_density))) g ")
+end
+
+function show(io::IO, det::CrystallineBoule)
+    print(io, det)
+end
+
+function show(io::IO, ::MIME"text/plain", det::CrystallineBoule)
+    show(io, det)
+end

@@ -214,21 +214,10 @@ end
     end
 end
 
-@recipe function f(geo::InvertedCoaxGeometry{T, ValidGeometry}; corner_rounding = :both, include_measurements = false, y_offset = 0) where {T}
-    fc = include_measurements ? :white : :lightgray
-    seriestype := :shape
-    fillcolor --> fc
-    aspect_ratio := 1.0
-    label --> nothing
+function det_outline(geo::InvertedCoaxGeometry{T}; corner_rounding = :both) where {T}
     H = geo.height
     R = geo.radius
 
-    if include_measurements
-        ticks := false
-        guide := ""
-        axis := false
-    end
-    
     bottom_taper_x = [R-geo.bottom_taper_height*tand(geo.bottom_taper_angle),R]
     bottom_taper_y = [0,geo.bottom_taper_height]
     
@@ -259,8 +248,26 @@ end
     dettop_y = vcat(detslicetop_y, reverse(detslicetop_y))
     dettop_x = vcat(detslicetop_x, -reverse(detslicetop_x))
     
-    det_y = vcat(detbot_y, dettop_y, detbot_y[1:1])
-    det_x = vcat(detbot_x, dettop_x, detbot_x[1:1])
+    vcat(detbot_x, dettop_x, detbot_x[1:1]), vcat(detbot_y, dettop_y, detbot_y[1:1])
+end
+
+@recipe function f(geo::InvertedCoaxGeometry{T, ValidGeometry}; corner_rounding = :both, include_measurements = false, y_offset = 0) where {T}
+    fc = include_measurements ? :white : :lightgray
+    seriestype := :shape
+    fillcolor --> fc
+    aspect_ratio := 1.0
+    label --> nothing
+    H = geo.height
+    R = geo.radius
+    borehole_x = geo.borehole_radius+geo.borehole_taper_height*tand(geo.borehole_taper_angle)
+
+    if include_measurements
+        ticks := false
+        guide := ""
+        axis := false
+    end
+    
+    det_x, det_y = det_outline(geo; corner_rounding=corner_rounding)
     
     @series begin
         linestyle := :solid
@@ -417,7 +424,12 @@ end
     end
 end
 
-@recipe function f(boule::BouleGeometry{T}) where {T}
+
+@recipe function f(boule::CrystallineBoule)
+    boule.geometry
+end
+
+@recipe function f(geo::BouleGeometry)
     aspect_ratio := 1.0
     seriestype := :shape
     fillcolor --> :lightgray
@@ -425,10 +437,26 @@ end
     linestyle --> :solid
     linecolor --> :black
 
-    z = range(boule.distance_from_seed_end[1], boule.distance_from_seed_end[end], 100)
-    r = boule.spline(z)
+    z = range(geo.z[1], geo.z[end], 100)
+    r = geo.spline(z)
 
     vcat(z,reverse(z)), vcat(r,-reverse(r))
+end
+
+@recipe function f(det::DetectorDesign, boule::CrystallineBoule, corner_rounding = :both)
+    aspect_ratio := 1.0
+    @series begin
+        boule.geometry
+    end
+    det_x, det_y = det_outline(det.geometry; corner_rounding=corner_rounding)
+    @series begin
+        seriestype := :shape
+        linestyle := :solid
+        linecolor --> :black
+        fillcolor --> :white
+        label --> nothing
+        -det_y .+ det.offset, det_x
+    end
 end
 
 end # module

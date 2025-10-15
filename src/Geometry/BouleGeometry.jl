@@ -7,11 +7,15 @@ struct BouleGeometry{N, T} <: AbstractBouleGeometry{N, T}
 end
 
 function BouleGeometry(::Type{T};
-        z::Vector{<:Number}, 
-        radius::Vector{<:Number}
+        z::Union{Number, Vector{<:Number}},
+        radius::Union{Number, Vector{<:Number}}
     ) where {T}
 
     @assert length(z) == length(radius) "Vectors must be the same length"
+    
+
+    if length(z) == 1 z, radius = [0*unit(z), z], [radius, radius] end
+    
     N = length(z)
 
     d = SVector{N, T}(to_internal_length_units.(z))
