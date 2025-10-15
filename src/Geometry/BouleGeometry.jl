@@ -51,3 +51,30 @@ function resample_with_min_step(x::AbstractVector{<:Real}, y::AbstractVector{<:R
 
     new_x, new_y
 end
+
+function get_unicode_rep(::BouleGeometry; cut::Bool = false)
+    if cut 
+        " ╭──╮╭──────────╮╭───╮  ", 
+        "/   ││          ││    \\ ",
+        "│   ││          ││     )",
+        "\\   ││          ││    / ",
+        " ╰──╯╰──────────╯╰───╯  "
+    else
+        " ╭───────────────────╮  ", 
+        "/                     \\ ",
+        "│                      )",
+        "\\                     / ",
+        " ╰───────────────────╯  "
+    end
+end
+
+function print(io::IO, geo::BouleGeometry)
+    g1,g2,g3,g4,g5 = get_unicode_rep(geo)
+    r, l = Int.(round.((maximum(geo.radius), geo.z[end]-geo.z[1])))
+    println(io, "$g1  ╮    $(typeof(geo))")
+    println(io, "$g2$(lpad(string(r), 3, ' '))ₘₘ  ╰─Radius: Maximum, Minimum")
+    println(io, "$g3  ╯      ╰─$(maximum(geo.radius)), $(minimum(geo.radius)) mm")
+    println(io, "$g4       ╰─Length: $(geo.z[end]-geo.z[1]) mm")
+    println(io, "$g5       ╰─Mass: $(Int(round(get_physical_volume(geo)*ge_76_density))) g ")
+    println(io, "╰────────$(lpad(string(l), 2, ' '))ₘₘ─────────╯ ")
+end

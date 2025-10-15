@@ -67,7 +67,7 @@ function InvertedCoaxGeometry(geo::InvertedCoaxGeometry{T};
     )
 end
 
-function get_unicode_rep(geo::InvertedCoaxGeometry{T, ValidGeometry}) where {T}
+function get_unicode_rep(::InvertedCoaxGeometry{<:Any, ValidGeometry})
     "╭───╮ ╭───╮", 
     "│   │ │   │",
     "│   │ │   │",
@@ -169,7 +169,7 @@ function print(io::IO, geo::InvertedCoaxGeometry{T, ValidGeometry}) where {T <: 
     br, pr,r, h, hg = Int.(round.((geo.borehole_radius, geo.pc_radius, geo.radius, geo.height, geo.borehole_pc_gap)))
     println(io, "     ╭╮$(lpad(string(br), 2, ' '))ₘₘ       $(typeof(geo))")
     println(io, "$g1  ╮    ╰─Bulk: Radius, Height, p⁺ radius, n⁺ depth:")
-    println(io, "$g2  │      ╰─$(geo.radius), $(geo.height), $(geo.pc_radius) mm, $(geo.dead_layer_depth) mm")
+    println(io, "$g2  │      ╰─$(geo.radius), $(geo.height), $(geo.pc_radius), $(geo.dead_layer_depth) mm")
     println(io, "$g3  │    ╰─Borehole: Gap, Radius, Taper height/angle:")
     println(io, "$g4  │      ╰─$(geo.borehole_pc_gap), $(geo.borehole_radius), $(geo.borehole_taper_height) mm / $(geo.borehole_taper_angle)°")
     println(io, "$g5$(lpad(string(hg), 3, ' '))ₘₘ$g6 $(lpad(string(h), 3, ' '))ₘₘ ╰─Goove: Depth, Inner/Outer radius:")

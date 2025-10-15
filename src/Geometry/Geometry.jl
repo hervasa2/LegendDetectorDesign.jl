@@ -21,10 +21,10 @@ function meta_2_geo(::Type{T}, meta::PropDict) where {T}
     end
 end
 
-function show(io::IO, geo::AbstractDesignGeometry{T, ValidGeometry}) where {T <: SSDFloat}
+function show(io::IO, geo::Union{AbstractBouleGeometry, AbstractDesignGeometry{<:Any, ValidGeometry}})
     print(io, geo)
 end
 
-function show(io::IO, ::MIME"text/plain", geo::AbstractDesignGeometry{T, ValidGeometry}) where {T <: SSDFloat}
+function show(io::IO, ::MIME"text/plain", geo::Union{AbstractBouleGeometry, AbstractDesignGeometry{<:Any, ValidGeometry}})
     show(io, geo)
 end

@@ -109,6 +109,10 @@ function meta_2_design(::Type{T}, meta::PropDict) where {T}
     end
 end
 
+get_unitful_property(det::DetectorDesign, prop::Symbol) = get_unitful_property(det, Val(prop))
+
+get_unitful_property(det::DetectorDesign, ::Val{:offset}) = det.offset * internal_length_unit
+
 function SolidStateDetectors.Simulation{T}(det::DetectorDesign{T}, imp_model::AbstractImpurityDensity{T}, env::HPGeEnvironment = HPGeEnvironment()) where {T<:AbstractFloat}
     meta = design_2_meta(det)
     sim = Simulation{T}(LegendData, meta, get_default_xtal_meta(det), env, verbose = false)
