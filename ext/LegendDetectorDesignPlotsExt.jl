@@ -426,10 +426,26 @@ end
 
 
 @recipe function f(boule::CrystallineBoule)
-    boule.geometry
+    aspect_ratio := 1.0
+    slice_thickness = 2.5
+    @series begin
+        boule.geometry
+    end
+    for z_hall in boule.z_hall
+        @series begin
+            seriestype := :path
+            seriestype := :shape
+            fillcolor --> :darkgray
+            label --> nothing
+
+            z = range(z_hall - slice_thickness, z_hall + slice_thickness, Int(ceil(slice_thickness*2)))
+            r = boule.geometry.spline(z)
+            vcat(z,reverse(z)), vcat(r,-reverse(r))
+        end
+    end
 end
 
-@recipe function f(geo::BouleGeometry)
+@recipe function f(geo::BouleGeometry; slice = (geo.z[1], geo.z[end]))
     aspect_ratio := 1.0
     seriestype := :shape
     fillcolor --> :lightgray
@@ -437,18 +453,42 @@ end
     linestyle --> :solid
     linecolor --> :black
 
-    z = range(geo.z[1], geo.z[end], 100)
+    z = range(slice[1], slice[2], 200)
     r = geo.spline(z)
 
     vcat(z,reverse(z)), vcat(r,-reverse(r))
 end
 
-@recipe function f(det::DetectorDesign, boule::CrystallineBoule, corner_rounding = :both)
+@recipe function f(det::DetectorDesign{T}, boule::CrystallineBoule{T}; corner_rounding = :both, technical_drawing = false, slice_offset = 20) where {T}
     aspect_ratio := 1.0
+    size --> (1200,400)
+
+    slice_thickness = 2.5
+    default_offset = 12
+
+    if technical_drawing 
+        ticks := false
+        guide := ""
+        axis := false
+        label --> nothing
+        bottom_margin --> 2*Plots.mm
+        top_margin --> 2*Plots.mm
+        left_margin --> 2*Plots.mm
+        right_margin := 2*Plots.mm
+    end
+    zcuts = sort(vcat(det.offset, boule.geometry.z[1], boule.geometry.z[end], boule.z_hall .+ slice_thickness, boule.z_hall .- slice_thickness))
+    idx = findfirst(zcuts .== det.offset)
+    zp = (zcuts[idx-1], zcuts[idx+1])
     @series begin
+        slice --> zp
         boule.geometry
     end
-    det_x, det_y = det_outline(det.geometry; corner_rounding=corner_rounding)
+    R = det.geometry.radius
+    det_x, det_y = if technical_drawing
+        [-1, 1, 1, -1]*R, [0, 0, 1, 1]*det.geometry.height
+    else 
+        det_outline(det.geometry; corner_rounding=corner_rounding)
+    end
     @series begin
         seriestype := :shape
         linestyle := :solid
@@ -456,6 +496,90 @@ end
         fillcolor --> :white
         label --> nothing
         -det_y .+ det.offset, det_x
+    end
+    if technical_drawing
+        θ = range(0,2π,600)
+        z1_cut = det.offset - det.geometry.height
+        z2_cut = det.offset
+        r1 = boule.geometry.spline(z1_cut)
+        r2 = boule.geometry.spline(z2_cut)
+
+        zs = collect(zp[1]:0.1:zp[end])
+    
+        boule_measurements = [
+            LinearMeasurement{T}((zs[1], -R), (z1_cut, -R),
+                -default_offset,"",(boule.geometry.spline(zs[1])-R-default_offset,r1-R-default_offset),(1,1)),
+            LinearMeasurement{T}((z1_cut, -R), (z2_cut, -R),
+                -default_offset,"",(r1-R-default_offset,r2-R-default_offset),(1,1)),
+            LinearMeasurement{T}((z2_cut, -R), (zs[end], -R),
+                -default_offset,"",(r2-R-default_offset,boule.geometry.spline(zs[end])-R-default_offset),(1,1)),
+            LinearMeasurement{T}((z2_cut-2default_offset , -R), (z2_cut-2default_offset , R),0,"Ø")
+        ]
+
+        slice_measurements = [
+            LinearMeasurement{T}((-(r1 + slice_offset) + zs[1], -R), (-(r1 + slice_offset) + zs[1], R),0,"Ø"),
+            LinearMeasurement{T}((r2 + slice_offset + zs[end] , -R), (r2 + slice_offset + zs[end] , R),0,"Ø"),
+            LinearMeasurement{T}((-(r1 + slice_offset) + zs[1], -r1), (-(r1 + slice_offset) + zs[1], r1),r1+default_offset,"Ø"),
+            LinearMeasurement{T}((r2 + slice_offset + zs[end] , -r2), (r2 + slice_offset + zs[end] , r2), -r2-default_offset,"Ø"),
+        ]
+
+        boule_slices = [
+            LinearMeasurement{T}((z1_cut, R),(z1_cut+1.5default_offset, R), 8, "A", (8,8),(4,4)),
+            LinearMeasurement{T}((z1_cut, -R),(z1_cut+1.5default_offset, -R), -default_offset-8, "A", (-8,-8),(4,4)),
+            LinearMeasurement{T}((z2_cut, R),(z2_cut+1.5default_offset, R), 8, "B", (8,8),(4,4)),
+            LinearMeasurement{T}((z2_cut, -R),(z2_cut+1.5default_offset, -R), -default_offset-8, "B", (-8,-8),(4,4)),
+        ]
+
+        @series begin
+            seriestype := :shape
+            fillcolor --> :lightgray
+            r1*cos.(θ) .- (r1 + slice_offset - zs[1]), r1*sin.(θ)
+        end
+        @series begin
+            seriestype := :shape
+            fillcolor --> :white
+            R*cos.(θ) .- (r1 + slice_offset - zs[1]), R*sin.(θ)
+        end
+        @series begin
+            seriestype := :shape
+            fillcolor --> :lightgray
+            r2*cos.(θ) .+ (r2 + slice_offset + zs[end]), r2*sin.(θ)
+        end
+        @series begin
+            seriestype := :shape
+            fillcolor --> :white
+            R*cos.(θ) .+ (r2 + slice_offset + zs[end]), R*sin.(θ)
+        end
+        @series begin
+            measurementfontsize --> 8
+            lw --> 0.7
+            vcat(boule_measurements, slice_measurements)
+        end
+        @series begin
+            measurementfontsize --> 12
+            annotate_measurement := false
+            arrows_and_guides := :start
+            arrow_length := 1.5
+            lw --> 1
+            boule_slices
+        end
+        @series begin
+            seriestype := :scatter
+            markersize := 0
+            markercolor := :white
+            series_annotations := [
+                Plots.text("SEED END", 12, :gray, :center, rotation = 90),
+                Plots.text("TAIL END", 12, :gray, :center, rotation = 270),
+                Plots.text("SECTION", 12, :gray, :center),
+                Plots.text("A-A", 8, :gray, :center),
+                Plots.text("SECTION", 12, :gray, :center),
+                Plots.text("B-B", 8, :gray, :center),
+                Plots.text(boule.name, 16, :black, :center)
+            ]
+            r = max(r1, r2)
+            [zs[1]-5, zs[end]+5, zs[1] - (r1 + slice_offset), zs[1] - (r1 + slice_offset) + 20, r2 + slice_offset + zs[end], r2 + slice_offset + zs[end] +20, zs[1] - (r1 + slice_offset)], 
+            [0, 0, r + 8, r + 8, r + 8, r + 8, -43 - 21]
+        end
     end
 end
 

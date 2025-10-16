@@ -18,8 +18,9 @@ function BouleGeometry(::Type{T};
     
     N = length(z)
 
-    d = SVector{N, T}(to_internal_length_units.(z))
-    r = SVector{N, T}(to_internal_length_units.(radius))
+    idx = sortperm(z)
+    d = SVector{N, T}(to_internal_length_units.(z[idx]))
+    r = SVector{N, T}(to_internal_length_units.(radius[idx]))
 
     new_d, new_r = resample_with_min_step(d, r)
     spline = cubic_spline_interpolation(new_d, new_r)
