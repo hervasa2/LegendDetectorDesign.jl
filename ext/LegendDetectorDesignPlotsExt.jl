@@ -348,7 +348,7 @@ end
 
 @recipe function f(det::DetectorDesign{T}; crystal_prefix = "", seed_label = "SEED", order = det.name[2:3], technical_drawing = false, spot_radius = 4, spot_offset = 25) where {T}
     aspect_ratio := 1.0
-    corner_rounding --> false
+    corner_rounding --> :both
     if technical_drawing 
         ticks := false
         guide := ""
