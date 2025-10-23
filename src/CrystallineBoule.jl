@@ -48,10 +48,31 @@ function print(io::IO, boule::CrystallineBoule)
     println(io, "$g5  ╰─Mass: $(Int(round(get_physical_volume(geo)*ge_76_density))) g ")
 end
 
-function show(io::IO, det::CrystallineBoule)
-    print(io, det)
+function show(io::IO, boule::CrystallineBoule)
+    print(io, boule)
 end
 
-function show(io::IO, ::MIME"text/plain", det::CrystallineBoule)
-    show(io, det)
+function show(io::IO, ::MIME"text/plain", boule::CrystallineBoule)
+    show(io, boule)
+end
+
+function write_metadata(boule::CrystallineBoule, det::DetectorDesign; path = "./")
+     meta = OrderedDict(
+            :name => boule.name[end-2:end],
+            :order => boule.order,
+            :impurity_measurements => OrderedDict(
+                    :value_in_1e9e_cm3 => boule.impurity_hall,
+                    :distance_from_seed_end_mm => boule.z_hall
+            ),
+            :impurity_curve => OrderedDict(
+                    :model => Symbol(boule.impurity_model),
+                    :parameters => OrderedDict(zip(fit_parameter_names(nameof(boule.impurity_model)), round.(boule.impurity_model_parameters, sigdigits = 4)))
+                    ),
+            :slices => OrderedDict(
+                Symbol(det.name[end]) => OrderedDict(
+                    :detector_offset_in_mm => det.offset
+                )
+            )
+    )
+    YAML.write_file(path*"V"*meta[:order]*meta[:name]*".yaml", meta)
 end

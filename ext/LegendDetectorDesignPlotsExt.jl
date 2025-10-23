@@ -459,7 +459,7 @@ end
     vcat(z,reverse(z)), vcat(r,-reverse(r))
 end
 
-@recipe function f(det::DetectorDesign{T}, boule::CrystallineBoule{T}; corner_rounding = :both, technical_drawing = false, slice_offset = 20) where {T}
+@recipe function f(boule::CrystallineBoule{T}, det::DetectorDesign{T}; corner_rounding = :both, technical_drawing = false, slice_offset = 20) where {T}
     aspect_ratio := 1.0
     size --> (1200,400)
 

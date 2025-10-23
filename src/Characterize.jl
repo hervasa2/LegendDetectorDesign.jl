@@ -29,7 +29,7 @@ function characterize!(det::DetectorDesign{T}, boule::CrystallineBoule{T};
         Vmax::Real = default_operational_V, 
         refinement_limits::Vector{<:Real} = [0.2, 0.1, 0.05, 0.02]
     ) where {T<:AbstractFloat}
-    idm = -1*impurity_density_model(nameof(boule.impurity_model)){T}(get_unitful_property(boule, :impurity_model_parameters), get_unitful_property(det, :offset))
+    idm = ssd_ptype*impurity_density_model(nameof(boule.impurity_model)){T}(get_unitful_property(boule, :impurity_model_parameters), get_unitful_property(det, :offset))
     characterize!(det, idm, env = env, verbose = verbose, Vmax = Vmax, refinement_limits = refinement_limits)
 end
 
